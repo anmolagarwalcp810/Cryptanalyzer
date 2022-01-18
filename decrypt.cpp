@@ -15,6 +15,103 @@ template<typename T> ostream& operator<<(ostream&os,const set<T>&s){os<<"{";for(
 template<typename T, typename S> ostream& operator<<(ostream&os,const pair<T,S>&p){os<<"["<<p.fs<<","<<p.sc<<"]";return os;}
 template<typename T, typename S> ostream& operator<<(ostream&os,const unordered_map<T,S>&h){os<<"{";for(auto i:h)os<<i<<", ";os<<"}";return os;}
 
+bool match(const string&a,const string&b){
+    // a is reference, b is output
+    if(a.size()==b.size()){
+        int n = a.size();
+        loop(i,n){
+            if(a[i]>='A' && a[i]<='Z' && a[i]!=b[i])return false;
+        }
+        return true;
+    }
+    else return false;
+}
+
+// construct trie to store dictionary
+struct Node{
+    bool leaf;
+    unordered_map<char,Node*> c;
+    Node(){
+        leaf=false;
+    }
+};
+
+class Trie{
+private:
+    Node* head;
+public:
+    Trie(){
+        head = new Node();
+    }
+    void insert(const string&word){
+        Node* cur = head;
+        for(auto i:word){
+            if(!cur->c.count(i)){
+                cur->c[i]=new Node();
+            }
+            cur=cur->c[i];
+        }
+        cur->leaf=true;
+    }
+    bool search(const string&word){
+        Node* cur = head;
+        for(auto i:word){
+            if(!cur->c.count(i))return false;
+            cur=cur->c[i];
+        }
+        return cur->leaf;
+    }
+    Node* prefix(const string&word){
+        Node* cur = head;
+        for(auto i:word){
+            if(!cur->c.count(i))return nullptr;
+            cur=cur->c[i];
+        }
+        return cur;
+    }
+    vector<string> get_all(const string&word){
+        // returns all the words with given prefix
+        Node* cur = prefix(word);
+        if(!cur)return {};
+        queue<pair<Node*,string>> q;
+        q.push(mp(cur,word));
+        vector<string> v;
+        while(!q.empty()){
+            auto temp = q.front();
+            q.pop();
+            if(temp.fs->leaf){
+                v.pb(temp.sc);
+            }
+            for(auto i:temp.fs->c){
+                string temp1 = temp.sc;
+                temp1+=i.fs;
+                q.push(mp(i.sc,temp1));
+            }
+        }
+        return v;
+    }
+    vector<string> find_words(const string&word){
+        // returns words which match at given places only.
+        int n = word.size(), i=0;
+        while(i<n){
+            if(word[i]>='A' && word[i]<='Z')i++;
+            else break;
+        }
+        if(i==n)return {};
+        else{
+            string word2 = word.substr(0,i);
+            // get the string of words
+            vector<string> temp = get_all(word2);
+            // now need to eliminate those words from output which don't match with given word.
+            vector<string> output;
+            for(auto i:temp){
+                if(match(word,i))output.pb(i);
+            }
+            return output;
+        }
+    }
+};
+
 auto compare_letter = [](const pair<char,int>&a, const pair<char,int>&b){return a.sc>=b.sc;};
 auto compare_freq = [](const pair<string,int>&a, const pair<string,int>&b){return a.sc>=b.sc;};
 void print(const set<pair<string,int>,decltype(compare_freq)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
@@ -34,6 +131,8 @@ four_cipher_order(compare_freq), five_cipher_order(compare_freq), six_cipher_ord
 unordered_map<char,int> cipher_letter;
 set<pair<char,int>,decltype(compare_letter)> cipher_letter_order(compare_letter);
 vector<string> v;
+Trie* trie;
+
 
 pair<string,vector<bool>> substitute(const string&s){
     string output = "";
@@ -58,6 +157,10 @@ pair<int,vector<bool>> count_substituted(string&a){
     return mp(count,arr);
 }
 
+inline void add_cipher(const char a,const char b){
+    cipher_plain[a]=b;
+    plain_cipher[b]=a;
+}
 
 
 int count_frequency_at_index(unordered_map<string,int>&h,char c,int i,bool total){
@@ -87,8 +190,7 @@ void check_on(){
                 loop(i,temp.size()){
                     if(cipher_plain.count(temp[i]))continue;
                     else{
-                        cipher_plain[temp[i]]='o';
-                        plain_cipher['o']=temp[i];
+                        add_cipher(temp[i],'o');
                     }
                 }
             }
@@ -102,10 +204,8 @@ void check_on(){
                 sort(arr0.begin(),arr0.end(),compare);
                 sort(arr1.begin(),arr1.end(),compare);
                 auto temp_function = [](vector<pair<int,char>>&arr){
-                    cipher_plain[arr[0].sc]='n';
-                    cipher_plain[arr[1].sc]='o';
-                    plain_cipher['n']=arr[0].sc;
-                    plain_cipher['o']=arr[1].sc;
+                    add_cipher(arr[0].sc,'n');
+                    add_cipher(arr[1].sc,'o');
                 };
                 if(arr0[0].fs==1){
                     temp_function(arr0);
@@ -126,8 +226,7 @@ void check_on(){
         for(auto i:two_cipher){
             string temp = i.fs;
             if(cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='n' && !cipher_plain.count(temp[1])){
-                cipher_plain[temp[1]]='o';
-                plain_cipher['o']=temp[1];
+                add_cipher(temp[1],'o');
                 break;
             }
         }
@@ -139,8 +238,7 @@ void check_on2(){
         string temp = i.fs;
         if(cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='n' && !cipher_plain.count(temp[0])){
             // then this is definitely o
-            cipher_plain[temp[0]]='o';
-            plain_cipher['o']=temp[0];
+            add_cipher(temp[0],'o');
             break;
         }
     }
@@ -150,8 +248,7 @@ void check_of(){
     for(auto i:two_cipher){
         string temp = i.fs;
         if(cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='o' && !cipher_plain.count(temp[1])){
-            cipher_plain[temp[1]]='f';
-            plain_cipher['f']=temp[1];
+            add_cipher(temp[1],'f');
             break;
         }
     }
@@ -163,14 +260,14 @@ void check_for(){
         string temp = i.fs;
         if(cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='f' && 
             cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='o'){
-            cipher_plain[temp[2]]='r';
-            plain_cipher['r']=temp[2];
+            add_cipher(temp[2],'r');
             break;
         }
     }
 }
 
 void check_there(){
+    // there, their
     // r was not found till now
     for(auto i:five_cipher){
         string temp = i.fs;
@@ -180,8 +277,31 @@ void check_there(){
             !cipher_plain.count(temp[3])
             ){
             // this is definitely r because s has already been found
-            cipher_plain[temp[3]]='r';
-            plain_cipher['r']=temp[3];
+            add_cipher(temp[3],'r');
+            break;
+        }
+        else if(cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='t' &&
+            cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='h' &&
+            cipher_plain.count(temp[2]) && cipher_plain[temp[2]]=='e' &&
+            cipher_plain.count(temp[3]) && cipher_plain[temp[3]]=='i' &&
+            !cipher_plain.count(temp[4])
+            ){
+            add_cipher(temp[4],'r');
+            break;
+        }
+    }
+}
+
+void check_here(){
+    // here
+    for(auto i:four_cipher){
+        string temp = i.fs;
+        if(cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='h' &&
+            temp[1]==temp[3] &&
+            cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='e'
+            ){
+            add_cipher(temp[2],'r');
+            break;
         }
     }
 }
@@ -192,8 +312,7 @@ void check_s(){
         string temp = i.fs;
         if(!cipher_plain.count(temp[0]) && cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='h' &&
             cipher_plain.count(temp[2]) && cipher_plain[temp[2]]=='e'){
-            cipher_plain[temp[0]]='s';
-            plain_cipher['s']=temp[0];
+            add_cipher(temp[0],'s');
         }
     }
 }
@@ -216,10 +335,8 @@ void check_is(){
         string temp_string = i.fs;
         auto temp = count_substituted(temp_string);
         if(temp.fs==0){
-            cipher_plain[temp_string[0]]='i';
-            cipher_plain[temp_string[1]]='s';
-            plain_cipher['i']=temp_string[0];
-            plain_cipher['s']=temp_string[1];
+            add_cipher(temp_string[0],'i');
+            add_cipher(temp_string[1],'s');
             break;
         }
     }
@@ -233,6 +350,65 @@ void check_is(){
 //         }
 //     }
 // }
+
+bool dictionary_substitution(string a){
+    int count = count_substituted(a).fs;
+    if(count==a.size())return false;
+    // now need to convert a
+    a = substitute(a).fs;
+    vector<string> words = trie->get_all(a);
+    if(words.size()==0)return false;
+    else if(words.size()==1){
+        // ideal, we assume that dictionary contains all the words, 
+        // so there would be no issues during substitution
+        int n = a.size();
+        string temp = words[0];
+        // perform substitution
+        loop(i,n){
+            if(a[i]>='A' && a[i]<='Z')continue;
+            else{
+                add_cipher(a[i],tolower(temp[i]));
+            }
+        }
+        return true;
+    }
+    else return false;
+}
+
+int infer(){
+    // run loop until none can be substituted
+    int count = 0;
+    for(auto i:v){
+        if(!punctuations.count(i[0]))count+=dictionary_substitution(i);
+    }
+    return count;
+}
+
+void run(){
+    int count = 1;
+    while(count){
+        count = infer();
+    }
+}
+
+void read_dictionary(const string&dictionary_file){
+    trie=new Trie();
+    ifstream file;
+    file.open(dictionary_file);
+    string line;
+    getline(file,line);
+    string cur = "";
+    loop(i,line.size()){
+        if(line[i]==','){
+            if(cur.size()){
+                trie->insert(cur);
+            }
+            cur="";
+        }
+    }
+    if(cur.size() && cur!=",")trie->insert(cur);
+    cur="";
+}
 
 inline void add_ordered(unordered_map<string,int>&h, set<pair<string,int>,decltype(compare_freq)>&s){for(auto i:h) s.insert(mp(i.fs,i.sc));}
 inline void add_ordered(unordered_map<char,int>&h,set<pair<char,int>,decltype(compare_letter)>&s){for(auto i:h) s.insert(mp(i.fs,i.sc));}
@@ -268,7 +444,6 @@ vector<string> solve(const string&s){
     add_ordered(four_cipher, four_cipher_order);
     add_ordered(five_cipher, five_cipher_order);
     add_ordered(cipher_letter, cipher_letter_order);
-    int count = 0;
     // check for 1 letter words, if highest frequency then replace with 'a', if no one letter then directly jump to next step
     if(one_cipher_order.size()>0){
         vector<pair<int,char>>temp;
@@ -326,13 +501,13 @@ vector<string> solve(const string&s){
     // IS backup : high frequency two letter (IMPLEMENT), verify with individual characters
     check_on2();
     check_there();
-    check_their();
     check_here();
-    // if(plain_cipher.count('r')){
-    //     check_for();
-    //     check_of();
-    // }
-
+    if(plain_cipher.count('r')){
+        check_for();
+        check_of();
+    }
+    // finally do substitution using dictionary.
+    run();
 
     cout<<substitute(s).fs<<endl;
     cout<<v<<endl;
