@@ -15,12 +15,35 @@ template<typename T> ostream& operator<<(ostream&os,const set<T>&s){os<<"{";for(
 template<typename T, typename S> ostream& operator<<(ostream&os,const pair<T,S>&p){os<<"["<<p.fs<<","<<p.sc<<"]";return os;}
 template<typename T, typename S> ostream& operator<<(ostream&os,const unordered_map<T,S>&h){os<<"{";for(auto i:h)os<<i<<", ";os<<"}";return os;}
 
+auto compare_letter = [](const pair<char,int>&a, const pair<char,int>&b){return a.sc>=b.sc;};
+auto compare_freq = [](const pair<string,int>&a, const pair<string,int>&b){return a.sc>=b.sc;};
+void print(const set<pair<string,int>,decltype(compare_freq)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
+void print(const set<pair<char,int>,decltype(compare_letter)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
+
+unordered_set<string> one_letter = {"a","i"};
+unordered_set<string> two_letter = {"am", "an", "as", "at", "be", "by", "do", "go", "he", "is", "in", "if", "it",
+"me","my","no","of","on","or","to","so","up","us","we"};
+unordered_set<char> punctuations = {' ', ',', ';', '!', '.'};
+vector<char> letter_frequency = {'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', 
+'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', 'x', 'q', 'z'};
+
+unordered_map<char,char> plain_cipher, cipher_plain;
+
 bool match(const string&a,const string&b){
     // a is reference, b is output
+    unordered_map<char,char> temp_cipher, temp_plain;
     if(a.size()==b.size()){
         int n = a.size();
         loop(i,n){
             if(a[i]>='A' && a[i]<='Z' && a[i]!=b[i])return false;
+            else if((a[i]>'Z' || a[i]<'A') && ((plain_cipher.count(tolower(b[i])))
+                || ((temp_cipher.count(a[i])&&temp_cipher[a[i]]!=b[i])) || 
+                ((temp_plain.count(b[i]))&&(temp_plain[b[i]]!=a[i]))
+                ))return false;
+            if(a[i]>'Z' || a[i]<'A'){
+                temp_cipher[a[i]]=b[i];     // add current temporary substitution to check if they don't interfere.
+                temp_plain[b[i]]=a[i];
+            }
         }
         return true;
     }
@@ -112,19 +135,6 @@ public:
     }
 };
 
-auto compare_letter = [](const pair<char,int>&a, const pair<char,int>&b){return a.sc>=b.sc;};
-auto compare_freq = [](const pair<string,int>&a, const pair<string,int>&b){return a.sc>=b.sc;};
-void print(const set<pair<string,int>,decltype(compare_freq)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
-void print(const set<pair<char,int>,decltype(compare_letter)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
-
-unordered_set<string> one_letter = {"a","i"};
-unordered_set<string> two_letter = {"am", "an", "as", "at", "be", "by", "do", "go", "he", "is", "in", "if", "it",
-"me","my","no","of","on","or","to","so","up","us","we"};
-unordered_set<char> punctuations = {' ', ',', ';', '!', '.'};
-vector<char> letter_frequency = {'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', 
-'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', 'x', 'q', 'z'};
-
-unordered_map<char,char> plain_cipher, cipher_plain;
 unordered_map<string,int> one_cipher, two_cipher, three_cipher, four_cipher, five_cipher, six_cipher;
 set<pair<string,int>,decltype(compare_freq)> one_cipher_order(compare_freq), two_cipher_order(compare_freq), three_cipher_order(compare_freq),
 four_cipher_order(compare_freq), five_cipher_order(compare_freq), six_cipher_order(compare_freq);
