@@ -92,7 +92,7 @@ public:
         }
         return cur;
     }
-    vector<string> get_all(const string&word){
+    vector<string> get_all(const string&word, const int max_length){
         // returns all the words with given prefix
         Node* cur = prefix(word);
         if(!cur)return {};
@@ -102,13 +102,15 @@ public:
         while(!q.empty()){
             auto temp = q.front();
             q.pop();
-            if(temp.fs->leaf){
+            if(temp.fs->leaf && temp.sc.size()==max_length){
                 v.pb(temp.sc);
             }
-            for(auto i:temp.fs->c){
-                string temp1 = temp.sc;
-                temp1+=i.fs;
-                q.push(mp(i.sc,temp1));
+            if(temp.sc.size()<max_length){
+                for(auto i:temp.fs->c){
+                    string temp1 = temp.sc;
+                    temp1+=i.fs;
+                    q.push(mp(i.sc,temp1));
+                }
             }
         }
         return v;
@@ -124,7 +126,7 @@ public:
         else{
             string word2 = word.substr(0,i);
             // get the string of words
-            vector<string> temp = get_all(word2);
+            vector<string> temp = get_all(word2,word.size());
             // now need to eliminate those words from output which don't match with given word.
             vector<string> output;
             for(auto i:temp){
