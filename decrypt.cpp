@@ -199,7 +199,6 @@ void check_on(){
         1. count first letter frequencies of each, 'n' would have only 1 and 'o' would have more.
         2. count second letter frequencies of each, 'n' would have higher.
     */
-
     for(auto i:two_cipher){
         string temp = i.fs;
         reverse(temp.begin(),temp.end());
