@@ -37,14 +37,14 @@ void solve2(string&line){
 int main(){
 	// TODO: take file name as argument
 	ifstream file;
-	file.open("dictionary_full.txt");
+	file.open("words/dictionary_full.txt");
 	string line;
 	while(file){
 		getline(file,line);
 		solve(line);
 	}
 	file.close();
-	file.open("words.txt");
+	file.open("words/words.txt");
 	while(file){
 		getline(file,line);
 		solve2(line);

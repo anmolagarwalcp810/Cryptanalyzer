@@ -547,6 +547,7 @@ void read_dictionary(const string&dictionary_file){
         else cur+=line[i];
     }
     if(cur.size() && cur!=",")trie->insert(cur);
+    file.close();
 }
 
 inline void add_ordered(unordered_map<string,int>&h, set<pair<string,int>,decltype(compare_freq)>&s){for(auto i:h) s.insert(mp(i.fs,i.sc));}
@@ -744,6 +745,18 @@ void solve(const string&s){
     }
 }
 
+void print_mapping(){
+    cout<<"Mapping:"<<endl;
+    for(int i=0;i<26;i++){
+        char c = 'a'+i;
+        if(plain_cipher.count(c)){
+            cout<<c<<": "<<plain_cipher[c]<<" | ";
+        }
+        else cout<<c<<": "<<"_"<<" | ";
+    }
+    cout<<endl;
+}
+
 int main(int argc,char* argv[]){
     if(argc<2){
         cout<<"Please enter file name"<<endl;
@@ -764,6 +777,7 @@ int main(int argc,char* argv[]){
         cout<<get_plaintext(s)<<endl;
         cout<<"Secret key:"<<endl;
         cout<<extract_key()<<endl;
+        print_mapping();
     }
     else{
         if(!strcmp(argv[2],"decryptText")) cout<<get_plaintext(s)<<endl;
