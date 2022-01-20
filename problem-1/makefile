@@ -1,5 +1,5 @@
-run: decrypt.cpp
-	g++ -o decrypt decrypt.cpp
+run: decipher_text.cpp
+	g++ -o decrypt decipher_text.cpp
 
 decryptText: run
 	make run
@@ -12,3 +12,6 @@ extractKey: run
 decrypt: run
 	make run
 	./decrypt $(file)
+
+clean:
+	rm -rf decrypt
