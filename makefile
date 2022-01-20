@@ -9,6 +9,6 @@ extractKey: run
 	make run
 	./decrypt $(file) extractKey
 
-getText: run
+decrypt: run
 	make run
 	./decrypt $(file)

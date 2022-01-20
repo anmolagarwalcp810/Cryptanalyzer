@@ -10,20 +10,20 @@ using namespace std;
 
 using ll = long long int;
 
-template<typename T> ostream& operator<<(ostream&os,const vector<T>&v){loop(i,v.size())os<<v[i]<<"|";os<<endl;return os;}
+template<typename T> ostream& operator<<(ostream&os,const vector<T>&v){loop(i,v.size())os<<v[i]<<"|";return os;}
 template<typename T> ostream& operator<<(ostream&os,const set<T>&s){os<<"{";for(auto i:s)os<<i<<", ";os<<"}";os<<endl;return os;}
 template<typename T, typename S> ostream& operator<<(ostream&os,const pair<T,S>&p){os<<"["<<p.fs<<","<<p.sc<<"]";return os;}
-template<typename T, typename S> ostream& operator<<(ostream&os,const unordered_map<T,S>&h){os<<"{";for(auto i:h)os<<i<<", ";os<<"}";return os;}
+template<typename T, typename S> ostream& operator<<(ostream&os,const unordered_map<T,S>&h){os<<"{";for(auto i:h)os<<i<<endl;os<<"}";return os;}
 
 auto compare_letter = [](const pair<char,int>&a, const pair<char,int>&b){return a.sc>=b.sc;};
 auto compare_freq = [](const pair<string,int>&a, const pair<string,int>&b){return a.sc>=b.sc;};
-void print(const set<pair<string,int>,decltype(compare_freq)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
+void print(const set<pair<string,int>,decltype(compare_freq)>&s){cout<<"{";for(auto i:s)cout<<i<<" ";cout<<"}"<<endl;}
 void print(const set<pair<char,int>,decltype(compare_letter)>&s){cout<<"{";for(auto i:s)cout<<i<<", ";cout<<"}"<<endl;}
 
 unordered_set<string> one_letter = {"a","i"};
 unordered_set<string> two_letter = {"am", "an", "as", "at", "be", "by", "do", "go", "he", "is", "in", "if", "it",
 "me","my","no","of","on","or","to","so","up","us","we"};
-unordered_set<char> punctuations = {' ', ',', ';', '!', '.','\n','\t'};
+unordered_set<char> punctuations = {' ', ',', ';', '!', '.','\n','\t','\r'};
 vector<char> letter_frequency = {'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', 
 'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', 'x', 'q', 'z'};
 
@@ -165,7 +165,7 @@ pair<string,vector<bool>> substitute(const string&s){
     return mp(output,v1);
 }
 
-pair<int,vector<bool>> count_substituted(string&a){
+pair<int,vector<bool>> count_substituted(const string&a){
     int count = 0;
     vector<bool> arr(a.size(),false);
     loop(i,a.size()){
@@ -345,15 +345,133 @@ void check_is(){
                 is_find[prev]++;
             }
         }
+        else if(temp.size()==3 && prev.size()==2){
+            int count1 = count_substituted(temp).fs;
+            if(count1==3){
+                string temp2 = substitute(temp).fs;
+                if(temp2=="THE"){
+                    is_find[prev]++;
+                }
+            }
+            
+        }
         prev=temp;
     }
     set<pair<string,int>,decltype(compare_freq)> s(compare_freq);
     for(auto i:is_find){
+        s.insert(mp(i.fs,i.sc));
+    }
+    for(auto i:s){
         string temp_string = i.fs;
         auto temp = count_substituted(temp_string);
         if(temp.fs==0){
             add_cipher(temp_string[0],'i');
             add_cipher(temp_string[1],'s');
+            break;
+        }
+    }
+}
+
+void check_if(){
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        if(temp.size()==2 && !cipher_plain.count(temp[0]) && cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='f'){
+            add_cipher(temp[0],'i');
+            break;
+        }
+    }
+}
+
+void check_is2(){
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        if(temp.size()==2 && !cipher_plain.count(temp[1]) && cipher_plain.count(temp[0]) && cipher_plain[temp[0]]=='i'){
+            add_cipher(temp[1],'s');
+            break;
+        }
+    }
+}
+
+void check_is3(){
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        if(temp.size()==2 && !cipher_plain.count(temp[0]) && cipher_plain.count(temp[1]) && cipher_plain[temp[1]]=='s'){
+            add_cipher(temp[0],'i');
+            break;
+        }
+    }
+}
+
+void check_for2(){
+    unordered_map<string,int> is_find;
+    string prev="";
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        if(temp.size()==1 && plain_cipher.count('a') && cipher_plain[temp[0]]=='a'){
+            if(prev.size()==3){
+                is_find[prev]++;
+            }
+        }
+        else if(temp.size()==3 && prev.size()==3){
+            int count1 = count_substituted(temp).fs;
+            if(count1==3){
+                string temp2 = substitute(temp).fs;
+                if(temp2=="THE"){
+                    is_find[prev]++;
+                }
+            }
+        }
+        prev=temp;
+    }
+    set<pair<string,int>,decltype(compare_freq)> s(compare_freq);
+    for(auto i:is_find){
+        s.insert(mp(i.fs,i.sc));
+    }
+    for(auto i:s){
+        string temp_string = i.fs;
+        auto temp = count_substituted(temp_string);
+        if(temp.fs==0){
+            add_cipher(temp_string[0],'f');
+            add_cipher(temp_string[1],'o');
+            add_cipher(temp_string[2],'r');
+            break;
+        }
+        else if(temp.fs==1 && temp.sc[1] && cipher_plain[temp_string[1]]=='o'){
+            add_cipher(temp_string[0],'f');
+            add_cipher(temp_string[2],'r');
+            break;
+        }
+        else if(temp.fs==2 && temp.sc[1] && temp.sc[2] && cipher_plain[temp_string[1]]=='o' && cipher_plain[temp_string[2]]=='r'){
+            add_cipher(temp_string[0],'f');
+        }
+    }
+}
+
+void check_ing(){
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        auto temp2 = substitute(temp);
+        string temp3 = temp2.fs;
+        if(temp3.size()>3 && temp3.substr(temp3.size()-2)=="NG" && !cipher_plain.count(temp3[temp3.size()-3])){
+            add_cipher(temp3[temp3.size()-3],'i');
+            break;
+        }
+    }
+}
+
+void check_ing2(){
+    loop(i,v.size()){
+        if(punctuations.count(v[i][0]))continue;
+        string temp = v[i];
+        auto temp2 = substitute(temp);
+        string temp3 = temp2.fs;
+        if(temp3.size()>3 && temp3.substr(temp3.size()-3,2)=="IN" && !cipher_plain.count(temp3[temp3.size()-1])){
+            add_cipher(temp3[temp3.size()-1],'g');
             break;
         }
     }
@@ -365,6 +483,8 @@ bool dictionary_substitution(string a){
     // now need to convert a
     a = substitute(a).fs;
     vector<string> words = trie->find_words(a);
+    // cout<<a<<endl;
+    // cout<<words<<endl;
     if(words.size()==0)return false;
     else if(words.size()==1){
         // ideal, we assume that dictionary contains all the words, 
@@ -388,10 +508,12 @@ int infer(){
     int count = 0;
     for(auto i:v){
         if(!punctuations.count(i[0])){
+            auto temp1 = substitute(i);
             bool flag = dictionary_substitution(i);
             // if(flag){
             //     cout<<i<<endl;
             //     cout<<substitute(i).fs<<endl;
+            //     cout<<temp1<<endl;
             // }
             count+=flag;
         }
@@ -468,10 +590,12 @@ void clear(){
     one_cipher_order.clear(), two_cipher_order.clear(), three_cipher_order.clear(), four_cipher_order.clear(), five_cipher_order.clear(), six_cipher_order.clear();
     cipher_letter.clear();
     cipher_letter_order.clear();
+    v.clear();
 }
 
 void solve_dictionary(const string &s){
     clear();
+    read_ciphertext(s);
     run();
 }
 
@@ -485,6 +609,7 @@ bool check(const string&s){
 
 void solve_frequency(const string&s){
     clear();
+    read_ciphertext(s);
     // check for 1 letter words, if highest frequency then replace with 'a', if no one letter then directly jump to next step
     if(one_cipher_order.size()){
         vector<pair<int,char>>temp;
@@ -532,19 +657,56 @@ void solve_frequency(const string&s){
 
     // now check for two letters which are palindromic : O(n) -> on, no
     check_on();
-    // now search for "is", can be found though "is a" type phrases
-    check_is();
     if(!plain_cipher.count('s'))check_s();
-    // IS backup : high frequency two letter (IMPLEMENT), verify with individual characters
-    check_on2();
     check_there();
     check_here();
     if(plain_cipher.count('r')){
         check_for();
         check_of();
     }
+    if(!plain_cipher.count('r')){
+        check_for2();       // for the
+    }
+    if(plain_cipher.count('r')&&plain_cipher.count('f')){
+        check_if();
+    }
+    if(plain_cipher.count('i')&&!plain_cipher.count('s')){
+        check_is2();
+    }
+    if(!plain_cipher.count('i') && plain_cipher.count('n') && plain_cipher.count('g')){
+        // check ing
+        check_ing();
+    }
     // finally do substitution using dictionary.
     run();
+    if(!check(s)){
+        check_on();
+        check_is();
+        if(!plain_cipher.count('s'))check_s();
+        check_there();
+        check_here();
+        if(plain_cipher.count('r')){
+            check_for();
+            check_of();
+        }
+        if(!plain_cipher.count('r')){
+            check_for2();       // for the
+        }
+        if(!plain_cipher.count('i') && plain_cipher.count('n') && plain_cipher.count('g')){
+            // check ing
+            check_ing();
+        }
+        if(plain_cipher.count('r')&&plain_cipher.count('f')){
+            check_if();
+        }
+        if(plain_cipher.count('a')&&plain_cipher.count('s')){
+            check_is3();
+        }
+        if(plain_cipher.count('i')){
+            check_is2();
+        }
+        run();
+    }
 }
 
 string extract_key(){
@@ -562,7 +724,12 @@ string extract_key(){
 string get_plaintext(const string&s){
     string output = "";
     loop(i,s.size()){
-        if(!punctuations.count(s[i]))output+=cipher_plain[s[i]];
+        if(!punctuations.count(s[i])){
+            if(cipher_plain.count(s[i])){
+                output+=cipher_plain[s[i]];
+            }
+            else output+=s[i];
+        }
         else output+=s[i];
     }
     return output;
@@ -571,11 +738,8 @@ string get_plaintext(const string&s){
 void solve(const string&s){
     // create dictionary
     read_dictionary("dictionary.txt");
-    read_ciphertext(s);
-    // cout<<"Solving through dictionary"<<endl;
     solve_dictionary(s);
     if(!check(s)){
-        // cout<<"Solving through frequency analysis"<<endl;
         solve_frequency(s);
     }
 }

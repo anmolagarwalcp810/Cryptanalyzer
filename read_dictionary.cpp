@@ -50,6 +50,12 @@ int main(){
 		solve2(line);
 	}
 	file.close();
+	// file.open("wordlist_10000.txt");
+	// while(file){
+	// 	getline(file,line);
+	// 	solve2(line);
+	// }
+	// file.close();
 	ofstream file2;
 	file2.open("dictionary.txt");
 	vector<string> v;
@@ -58,7 +64,7 @@ int main(){
 	}
 	sort(v.begin(),v.end());
 	for(auto i:v){
-		if(i.size()>0)file2<<i<<",";
+		if(i.size()>3)file2<<i<<",";
 		file2.flush();
 	}
 	file2<<endl;
