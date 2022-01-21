@@ -773,11 +773,12 @@ int main(int argc,char* argv[]){
     }
     solve(s);
     if(argc==2){
-        cout<<"Plaintext:"<<endl;
-        cout<<get_plaintext(s)<<endl;
-        cout<<"Secret key:"<<endl;
-        cout<<extract_key()<<endl;
-        print_mapping();
+        string ciphertext = s;
+        string deciphered_text = get_plaintext(s);
+        string deciphered_key = extract_key();
+        cout<<"Ciphertext: "<<ciphertext<<endl;
+        cout<<"Deciphered Plaintext: "<<deciphered_text<<endl;
+        cout<<"Deciphered Key: "<<deciphered_key<<endl;    
     }
     else{
         if(!strcmp(argv[2],"decryptText")) cout<<get_plaintext(s)<<endl;
