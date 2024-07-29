@@ -7,3 +7,5 @@ This implementation finds out the secret key given any ciphertext and decrypts t
 ```bash
 make file="example_ciphertext.txt"
 ```
+
+Video explaining logic behind substitution cipher: https://drive.google.com/file/d/1uzuL51jF-0B5WmQTzEkIgxPofIkO8yA4/view?usp=sharing
